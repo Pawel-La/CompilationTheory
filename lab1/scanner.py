@@ -1,5 +1,5 @@
 from sly import Lexer
-
+#komentarz
 
 class MyLexer(Lexer):
 
