@@ -1,12 +1,15 @@
 from sly import Lexer
 
 
-class Scanner(Lexer):
+class MyLexer(Lexer):
 
     tokens = {
-        DOT_PLUS, DOT_MINUS, DOT_MUL, DOT_DIV, INC_ASSIGN, DEC_ASSIGN, MUL_ASSIGN,
-        DIV_ASSIGN, BE, SE, NE, EQ, ID, IF, ELSE, FOR, WHILE, BREAK, CONTINUE,
-        RETURN, EYE, ZEROS, ONES, PRINT, DECIMAL, FLOAT, STRING
+        DOT_PLUS, DOT_MINUS, DOT_MUL, DOT_DIV,
+        INC_ASSIGN, DEC_ASSIGN, MUL_ASSIGN, DIV_ASSIGN,
+        GREATER_EQ, LESS_EQ, NOT_EQ, EQ,
+        ID, IF, ELSE, FOR, WHILE, BREAK, CONTINUE, RETURN, PRINT,
+        EYE, ZEROS, ONES,
+        DECIMAL, FLOAT, STRING
     }
 
     literals = {
@@ -14,20 +17,20 @@ class Scanner(Lexer):
         '}', ':', '\''
     }
 
-    DOT_PLUS = r'\.\+'
-    DOT_MINUS = r'\.-'
-    DOT_MUL = r'\.\*'
-    DOT_DIV = r'\./'
+    DOT_PLUS    = r'\.\+'
+    DOT_MINUS   = r'\.-'
+    DOT_MUL     = r'\.\*'
+    DOT_DIV     = r'\./'
 
     INC_ASSIGN = r'\+='
     DEC_ASSIGN = r'-='
     MUL_ASSIGN = r'\*='
     DIV_ASSIGN = r'/='
 
-    BE = r'>='
-    SE = r'<='
-    NE = r'!='
-    EQ = r'=='
+    GREATER_EQ  = r'>='
+    LESS_EQ     = r'<='
+    NOT_EQ      = r'!='
+    EQ          = r'=='
 
     ID = r'[a-zA-Z_][a-zA-Z0-9_]*'
     ID['if']        = IF
@@ -42,9 +45,9 @@ class Scanner(Lexer):
     ID['ones']      = ONES
     ID['print']     = PRINT
 
-    FLOAT   = r'(\d*\.\d+[eE]?\d+)|(\d+\.\d*[eE]?\d+)|(\d*\.\d+)|(\d+\.\d*)'
+    FLOAT   = r'((\d*\.\d+)|(\d+\.))([eE]?\d+)?'
     DECIMAL = r'\d+'
-    STRING  = r'(\".*\")|(\'.*\')'
+    STRING  = r'(\".*?\")|(\'.*?\')'
 
     ignore = ' \t'
     ignore_comment = r'\#.*'
