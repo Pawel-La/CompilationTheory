@@ -1,5 +1,6 @@
 from sly import Parser
 from scanner import MyLexer
+import AST
 
 
 class MyParser(Parser):
@@ -20,11 +21,12 @@ class MyParser(Parser):
 
     @_("Statement StatementList")
     def StatementList(self, p):
-        return [p[0]] + p[1]
+        p[1].statements.insert(0, p[0])
+        return p[1]
 
     @_("Statement")
     def StatementList(self, p):
-        return [p[0]]
+        return AST.StatementList(statements=[p[0]])
 
     @_(
         "CompoundStatement",
@@ -45,34 +47,59 @@ class MyParser(Parser):
 
     @_('IF "(" Expression ")" Statement %prec IF_PREC')
     def IfStatement(self, p):
-        return "IF_TAG", (("IF", p[2]), ("THEN", p[4]))
+        return AST.IfStatement(
+            expression=p[2],
+            statement_if=p[4],
+            line_number=p.lineno
+        )
 
     @_('IF "(" Expression ")" Statement ELSE Statement')
     def IfStatement(self, p):
-        return "IF_ELSE_TAG", (("IF", p[2]), ("THEN", p[4]), ("ELSE", p[6]))
+        return AST.IfStatement(
+            expression=p[2],
+            statement_if=p[4],
+            statement_else=p[6],
+            line_number=p.lineno
+        )
 
     @_('WHILE "(" Expression ")" Statement')
     def WhileStatement(self, p):
-        return 'WHILE', p[2], p[4]
+        return AST.WhileStatement(
+            expression=p[2],
+            statement=p[4],
+            line_number=p.lineno
+        )
 
     @_(
         'FOR ID "=" Range Statement',
         'FOR ID "=" List Statement',
     )
     def ForStatement(self, p):
-        return 'FOR', p[1], p[3], p[4]
+        return AST.ForStatement(
+            identifier=p[1],
+            range_or_list=p[3],
+            statement=p[4],
+            line_number=p.lineno
+        )
 
     @_("BREAK", "CONTINUE")
     def JumpStatement(self, p):
-        return p[0].upper()
+        return AST.JumpStatement(
+            name=p[0].upper()
+        )
 
     @_("RETURN Expression")
     def JumpStatement(self, p):
-        return p[0], p[1]
+        return AST.JumpStatement(
+            name=p[0],
+            expression=p[1]
+        )
 
     @_("PRINT ListContent")
     def PrintStatement(self, p):
-        return 'PRINT', p[1]
+        return AST.PrintStatement(
+            list_content=p[1]
+        )
 
     @_(
         'ID_Content "="         Expression',
@@ -82,7 +109,11 @@ class MyParser(Parser):
         "ID_Content MUL_ASSIGN  Expression",
     )
     def AssignmentStatement(self, p):
-        return (p[1], p[0], p[2])
+        return AST.AssignmentStatement(
+            id_content=p[0],
+            assign_op=p[1],
+            expression=p[2]
+        )
 
     @_(
         'Expression "+"         Expression',
@@ -101,7 +132,11 @@ class MyParser(Parser):
         'Expression "<"         Expression',
     )
     def Expression(self, p):
-        return (p[1], p[0], p[2])
+        return AST.BinaryOperation(
+            left_expression=p[0],
+            op=p[1],
+            right_expression=p[2]
+        )
 
     @_('"(" Expression ")"')
     def Expression(self, p):
@@ -109,11 +144,15 @@ class MyParser(Parser):
 
     @_('"-" Expression %prec UMINUS')
     def Expression(self, p):
-        return ('-', p[1])
+        return AST.UnaryMinusOperation(
+            expression=p[1]
+        )
 
     @_('Expression "\'"')
     def Expression(self, p):
-        return ('TRANSPOSE', p[0])
+        return AST.TransposeOperation(
+            expression=p[0]
+        )
 
     @_(
         "List",
@@ -127,18 +166,25 @@ class MyParser(Parser):
 
     @_('RangeElement ":" RangeElement')
     def Range(self, p):
-        return ("RANGE", p[0], p[2])
+        return AST.Range(
+            left_range_element=p[0],
+            right_range_element=p[2]
+        )
 
     @_(
         "Number",
         "ID"
     )
     def RangeElement(self, p):
-        return p[0]
+        return AST.RangeElement(
+            value=p[0]
+        )
 
     @_('"[" ListContent "]"')
     def List(self, p):
-        return 'LIST', p[1]
+        return AST.List(
+            list_content=p[1]
+        )
 
     @_('Expression "," ListContent')
     def ListContent(self, p):
@@ -150,23 +196,35 @@ class MyParser(Parser):
 
     @_("ID")
     def ID_Content(self, p):
-        return p[0]
+        return AST.IdContent(
+            identifier=p[0]
+        )
 
     @_("ID ListAccess")
     def ID_Content(self, p):
-        return 'ACCESS', p[0], p[1]
+        return AST.IdContent(
+            identifier=p[0],
+            list_access=p[1]
+        )
 
     @_('"[" ListAccessElement "]"')
     def ListAccess(self, p):
-        return ([p[1]])
+        return AST.ListAccess(
+            list_access_element_left=p[1],
+        )
 
     @_('"[" ListAccessElement "," ListAccessElement "]"')
     def ListAccess(self, p):
-        return ([p[1]] + [p[3]])
+        return AST.ListAccess(
+            list_access_element_left=p[1],
+            list_access_element_right=p[3]
+        )
 
     @_('DECIMAL', 'ID')
     def ListAccessElement(self, p):
-        return p[0]
+        return AST.ListAccessElement(
+            value=p[0],
+        )
 
     @_(
         'EYE "(" Expression ")"',
@@ -174,14 +232,19 @@ class MyParser(Parser):
         'ONES "(" Expression ")"',
     )
     def MatrixSpecialFunction(self, p):
-        return (p[0].upper(), p[2])
+        return AST.MatrixSpecialFunction(
+            function=p[0],
+            expression=p[2]
+        )
 
     @_(
         "DECIMAL",
         "FLOAT"
     )
     def Number(self, p):
-        return p[0]
+        return AST.Number(
+            value=p[0]
+        )
 
     def error(self, p):
         if p:

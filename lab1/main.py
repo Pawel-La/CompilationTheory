@@ -1,7 +1,6 @@
 import sys
 import scanner
 import Parser
-from ast_draw import draw_ast
 
 EXAMPLES_PATH = "lab1/examples"
 
@@ -21,7 +20,6 @@ if __name__ == '__main__':
     lexer = scanner.MyLexer()
     parser = Parser.MyParser()
 
-    result = parser.parse(lexer.tokenize(text))
-    if result:
-        draw_ast(result)
+    ast = parser.parse(lexer.tokenize(text))
 
+    ast.print()
