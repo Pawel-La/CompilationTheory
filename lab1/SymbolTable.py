@@ -5,7 +5,18 @@ class Types(Enum):
     FLOAT = 'float'
     BOOL = 'bool'
     STRING = 'string'
-    VECTOR = 'vecotr'
+    VECTOR = 'vector'
+
+def type_covertion(elem):
+    if isinstance(elem, str):
+        return Types.STRING
+    if isinstance(elem, int):
+        return Types.INT
+    if isinstance(elem, float):
+        return Types.FLOAT
+    if isinstance(elem, VariableSymbol):
+        return elem.type
+
 
 class VariableSymbol:
 
@@ -50,5 +61,5 @@ class SymbolTable(object):
     #
 
     def popScope(self):
-        return self.parent()
+        return self.parent
     #

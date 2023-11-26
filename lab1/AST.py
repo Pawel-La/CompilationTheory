@@ -1,6 +1,4 @@
 from abc import ABC, abstractmethod
-
-
 class Node(ABC):
     count = 0
 
@@ -70,7 +68,6 @@ class ForStatement(Node):
     ):
         super().__init__()
         self.line_number = line_number
-
         self.identifier = identifier
         self.range_or_list = range_or_list
         self.statement = statement
@@ -191,7 +188,7 @@ class Range(Node):
     ):
         super().__init__()
         self.line_number = line_number
-
+        
         self.left_range_element = left_range_element
         self.right_range_element = right_range_element
 
@@ -293,7 +290,6 @@ class Number(Node):
     def __init__(self, value, line_number=None):
         super().__init__()
         self.line_number = line_number
-
         self.value = value
 
     def print(self, indent=0):

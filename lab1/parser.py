@@ -85,20 +85,23 @@ class MyParser(Parser):
     @_("BREAK", "CONTINUE")
     def JumpStatement(self, p):
         return AST.JumpStatement(
-            name=p[0].upper()
+            name=p[0].upper(),
+            line_number=p.lineno
         )
 
     @_("RETURN Expression")
     def JumpStatement(self, p):
         return AST.JumpStatement(
             name=p[0],
-            expression=p[1]
+            expression=p[1],
+            line_number=p.lineno
         )
 
     @_("PRINT ListContent")
     def PrintStatement(self, p):
         return AST.PrintStatement(
-            list_content=p[1]
+            list_content=p[1],
+            line_number=p.lineno
         )
 
     @_(
@@ -112,7 +115,8 @@ class MyParser(Parser):
         return AST.AssignmentStatement(
             id_content=p[0],
             assign_op=p[1],
-            expression=p[2]
+            expression=p[2],
+            line_number=p.lineno
         )
 
     @_(
@@ -135,7 +139,8 @@ class MyParser(Parser):
         return AST.BinaryOperation(
             left_expression=p[0],
             op=p[1],
-            right_expression=p[2]
+            right_expression=p[2],
+            line_number=p.lineno
         )
 
     @_('"(" Expression ")"')
@@ -145,13 +150,15 @@ class MyParser(Parser):
     @_('"-" Expression %prec UMINUS')
     def Expression(self, p):
         return AST.UnaryMinusOperation(
-            expression=p[1]
+            expression=p[1],
+            line_number=p.lineno
         )
 
     @_('Expression "\'"')
     def Expression(self, p):
         return AST.TransposeOperation(
-            expression=p[0]
+            expression=p[0],
+            line_number=p.lineno
         )
 
     @_(
@@ -168,7 +175,8 @@ class MyParser(Parser):
     def Range(self, p):
         return AST.Range(
             left_range_element=p[0],
-            right_range_element=p[2]
+            right_range_element=p[2],
+            line_number=p.lineno
         )
 
     @_(
@@ -177,13 +185,15 @@ class MyParser(Parser):
     )
     def RangeElement(self, p):
         return AST.RangeElement(
-            value=p[0]
+            value=p[0],
+            line_number=p.lineno
         )
 
     @_('"[" ListContent "]"')
     def List(self, p):
         return AST.List(
-            list_content=p[1]
+            list_content=p[1],
+            line_number=p.lineno
         )
 
     @_('Expression "," ListContent')
@@ -197,33 +207,38 @@ class MyParser(Parser):
     @_("ID")
     def ID_Content(self, p):
         return AST.IdContent(
-            identifier=p[0]
+            identifier=p[0],
+            line_number=p.lineno
         )
 
     @_("ID ListAccess")
     def ID_Content(self, p):
         return AST.IdContent(
             identifier=p[0],
-            list_access=p[1]
+            list_access=p[1],
+            line_number=p.lineno
         )
 
     @_('"[" ListAccessElement "]"')
     def ListAccess(self, p):
         return AST.ListAccess(
             list_access_element_left=p[1],
+            line_number=p.lineno
         )
 
     @_('"[" ListAccessElement "," ListAccessElement "]"')
     def ListAccess(self, p):
         return AST.ListAccess(
             list_access_element_left=p[1],
-            list_access_element_right=p[3]
+            list_access_element_right=p[3],
+            line_number=p.lineno
         )
 
     @_('DECIMAL', 'ID')
     def ListAccessElement(self, p):
         return AST.ListAccessElement(
             value=p[0],
+            line_number=p.lineno
         )
 
     @_(
@@ -234,7 +249,8 @@ class MyParser(Parser):
     def MatrixSpecialFunction(self, p):
         return AST.MatrixSpecialFunction(
             function=p[0],
-            expression=p[2]
+            expression=p[2],
+            line_number=p.lineno
         )
 
     @_(
@@ -243,7 +259,8 @@ class MyParser(Parser):
     )
     def Number(self, p):
         return AST.Number(
-            value=p[0]
+            value=p[0],
+            line_number=p.lineno
         )
 
     def error(self, p):

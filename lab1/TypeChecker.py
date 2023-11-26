@@ -3,15 +3,6 @@ import AST
 from SymbolTable import *
 from SymbolTable import Types as T
 
-def type_covertion(elem):
-    if isinstance(elem, str):
-        return T.STRING
-    if isinstance(elem, int):
-        return T.INT
-    if isinstance(elem, float):
-        return T.FLOAT
-    elif isinstance(elem, VariableSymbol):
-        return elem.type
 
 
 
@@ -136,7 +127,8 @@ class NodeVisitor(object):
 
 
     def generic_visit(self, node):        # Called if no explicit visitor function exists for a node.
-        print("generic_visit", node.__class__.__name__)
+        print(node)
+        print( "generic_visit", node.__class__.__name__)
 
 
 
@@ -158,14 +150,14 @@ class TypeChecker(NodeVisitor):
         try:
             new_type = binary_correlations[node.op][sym1][sym2]
         except KeyError:
-            print(f"Operation {node.op} not supported between types {sym1.type} and {sym2.type} in line {node.line_number}")
+            self.errors.append(f"Operation {node.op} not supported between types {sym1.type} and {sym2.type} in line {node.line_number}")
             return
 
         if sym1.type == sym2.type == T.VECTOR:
             if sym1.shape == sym2.shape:
                 return VariableSymbol(None, T.VECTOR, sym1)
             else:
-                print(f"Vectors different shape on line {node.line_number}")
+                self.errors.append(f"Vectors different shape on line {node.line_number}")
         return VariableSymbol(None, new_type)
 
     def visit_StatementList(self, node :AST.StatementList):
@@ -195,14 +187,24 @@ class TypeChecker(NodeVisitor):
         self.symbol_table = self.symbol_table.pushScope("For")
         self.visit(node.range_or_list)
 
-        self.symbol_table.dict[node.identifier.name] = VariableSymbol(
-            node.identifier.name, node.type
-        )
+        if isinstance(node.range_or_list, AST.Range):
+            symbol = self.visit(node.range_or_list)
+        elif isinstance(node.range_or_list, AST.List):
+            symbol = self.visit(node.range_or_list.content[0])
 
+        self.symbol_table.symbols[node.identifier] = symbol
         self.visit(node.statement)
 
         self.loopcount -= 1
         self.symbol_table = self.symbol_table.popScope()
+
+    def visit_Range(self, node: AST.Range):
+        from_exp = self.visit(node.left_range_element)
+        to_exp = self.visit(node.right_range_element)
+
+        if from_exp.type == T.FLOAT or to_exp.type == T.FLOAT:
+            return VariableSymbol(None,T.FLOAT)
+        return VariableSymbol(None,T.INT)
 
     def visit_JumpStatement(self, node: AST.JumpStatement):
         if node.name == "BREAK" or node.name == "CONTINUE":
@@ -210,6 +212,17 @@ class TypeChecker(NodeVisitor):
                 self.errors.append(
                     f"Break/Continue outside of loop in line {node.line_number}"
                 )
+
+    def visit_RangeElement(self, node: AST.RangeElement):
+        if isinstance(node.value, str):
+            symbol = self.symbol_table.get(node.value)
+            if symbol is None:
+                self.errors.append(
+                    f"Variable {node.value} not declared in line {node.line_number}"
+                )
+            return symbol
+            
+        return self.visit(node.value)
 
     def visit_PrintStatement(self, node : AST.PrintStatement):
         self.visit(node.list_content)
@@ -231,6 +244,14 @@ class TypeChecker(NodeVisitor):
                 element_type = VariableSymbol(None, type_covertion(element))
             types += [element_type]
 
+        lens = [len(x.list_content) if isinstance(x, AST.List) else x for x in elements]
+        print(lens)
+        for i in lens:
+            if i != lens[0]:
+                        self.errors.append(
+                f"Vector elements have different shapes in line {node.line_number}"
+            )
+        
         if all(x == types[0] for x in types):
             if isinstance(types[0], VariableSymbol):
                 if types[0].shape is None:
@@ -241,7 +262,7 @@ class TypeChecker(NodeVisitor):
                 return VariableSymbol(None, T.VECTOR, (len(elements),))
         else:
             self.errors.append(
-                f"Vector elements have different types or shapes in line {node.line_number}"
+                f"Vector elements have different types in line {node.line_number}"
             )
             return None
   
