@@ -1,5 +1,5 @@
 from enum import Enum
-
+import AST
 class Types(Enum):
     INT = 'int'
     FLOAT = 'float'
@@ -16,6 +16,8 @@ def type_covertion(elem):
         return Types.FLOAT
     if isinstance(elem, VariableSymbol):
         return elem.type
+    if isinstance(elem, AST.Number):
+        return type_covertion(elem.value)
 
 
 class VariableSymbol:
@@ -25,16 +27,16 @@ class VariableSymbol:
             raise ValueError(f"Invalid type: {type}")
         self.name = name
         self.type = type
-        self.shape = None
+        self.shape = shape
 
     # to use hashmaps
     def __hash__(self) -> int:
         return (self.type.__hash__() + self.shape.__hash__() )
 
-    def __eq__(self, value: object) -> bool:
-        if not isinstance(value, VariableSymbol):
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, VariableSymbol):
             return False
-        return self.__hash__() == value.__hash__()
+        return self.type == other.type and self.shape == other.shape
 
 class SymbolTable(object):
 
@@ -63,3 +65,6 @@ class SymbolTable(object):
     def popScope(self):
         return self.parent
     #
+
+    def __str__(self):
+        return '#'*20+'\n' +'\n'.join(self.symbols.items())+'\n'+'#'*20+'\n'

@@ -10,7 +10,7 @@ if __name__ == '__main__':
     try:
         filename = sys.argv[1] \
             if len(sys.argv) > 1 \
-            else f"{EXAMPLES_PATH}/example9.txt"
+            else f"{EXAMPLES_PATH}/example6.txt"
         file = open(filename, "r")
         text = file.read()
     except IOError:
@@ -25,4 +25,5 @@ if __name__ == '__main__':
     checker.visit(ast)
     for e in checker.errors:
         print('[ERROR]'+e)
-    ast.print()
+    if len(checker.errors) == 0:
+        ast.print()

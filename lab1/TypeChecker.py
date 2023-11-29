@@ -148,7 +148,7 @@ class TypeChecker(NodeVisitor):
             return 
 
         try:
-            new_type = binary_correlations[node.op][sym1][sym2]
+            new_type = binary_correlations[node.op][sym1.type][sym2.type]
         except KeyError:
             self.errors.append(f"Operation {node.op} not supported between types {sym1.type} and {sym2.type} in line {node.line_number}")
             return
@@ -198,6 +198,19 @@ class TypeChecker(NodeVisitor):
         self.loopcount -= 1
         self.symbol_table = self.symbol_table.popScope()
 
+    def visit_TransposeOperation(self, node : AST.TransposeOperation):
+        if not (isinstance(node.expression, AST.IdContent) or isinstance(node.expression, AST.List)):
+            self.errors.append(f"Only Vectors can be transposed [{node.line_number}]")
+            return
+        symbol : VariableSymbol = self.visit(node.expression)
+        return VariableSymbol(None, symbol.type, symbol.shape[::-1])
+
+    def visit_UnaryMinusOperation(self, node : AST.UnaryMinusOperation):
+        if node in [AST.List, AST.IdContent, AST.Number]:
+            return self.visit(node.expression)
+        self.errors.append(f"Wrong type after minus in line {node.line_number}")
+        return
+
     def visit_Range(self, node: AST.Range):
         from_exp = self.visit(node.left_range_element)
         to_exp = self.visit(node.right_range_element)
@@ -228,7 +241,6 @@ class TypeChecker(NodeVisitor):
         self.visit(node.list_content)
 
     def visit_AssignmentStatement(self, node: AST.AssignmentStatement):
-        # symbol = self.visit(node.expression)
         symbol = self.visit(node.expression)
         if symbol == None:
             return None
@@ -238,26 +250,16 @@ class TypeChecker(NodeVisitor):
         elements = node.list_content
         types = []
         for element in elements:
-            if isinstance(element, AST.Node):
+            if isinstance(element, AST.List):
                 element_type = self.visit(element)
             else:
                 element_type = VariableSymbol(None, type_covertion(element))
             types += [element_type]
+    
 
-        lens = [len(x.list_content) if isinstance(x, AST.List) else x for x in elements]
-        print(lens)
-        for i in lens:
-            if i != lens[0]:
-                        self.errors.append(
-                f"Vector elements have different shapes in line {node.line_number}"
-            )
-        
         if all(x == types[0] for x in types):
-            if isinstance(types[0], VariableSymbol):
-                if types[0].shape is None:
-                    return VariableSymbol(None, T.VECTOR, (len(elements),))
-                else:
-                    return VariableSymbol(None, T.VECTOR, (len(elements), *types[0].shape))
+            if types[0].type == T.VECTOR:
+                return VariableSymbol(None, T.VECTOR, (len(elements),types[0].shape[0]))
             else:
                 return VariableSymbol(None, T.VECTOR, (len(elements),))
         else:
@@ -285,3 +287,6 @@ class TypeChecker(NodeVisitor):
     def visit_Number(self, node : AST.Number):
         return VariableSymbol(None,type_covertion(node.value))
     
+
+if __name__ == "__main__":
+    print(binary_correlations["./"][Types.VECTOR][Types.VECTOR])

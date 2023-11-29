@@ -7,7 +7,7 @@ for i = 1:N {
         print i, j;
     }
 }
-
+k = 8;
 while(k>0) {
     if(k<5)
         i = 1;

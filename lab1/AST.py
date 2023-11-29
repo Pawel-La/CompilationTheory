@@ -277,7 +277,7 @@ class MatrixSpecialFunction(Node):
     def __init__(self, function, expression, line_number=None):
         super().__init__()
         self.line_number = line_number
-
+        print(function)
         self.function = function
         self.expression = expression
 
