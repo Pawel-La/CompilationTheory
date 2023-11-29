@@ -254,12 +254,20 @@ class MyParser(Parser):
         )
 
     @_(
-        "DECIMAL",
+        "DECIMAL"
+    )
+    def Number(self, p):
+        return AST.Number(
+            value=int(p[0]),
+            line_number=p.lineno
+        )
+    
+    @_(
         "FLOAT"
     )
     def Number(self, p):
         return AST.Number(
-            value=p[0],
+            value=float(p[0]),
             line_number=p.lineno
         )
 
