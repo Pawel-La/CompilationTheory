@@ -1,11 +1,14 @@
 from enum import Enum
 import AST
+
+
 class Types(Enum):
     INT = 'int'
     FLOAT = 'float'
     BOOL = 'bool'
     STRING = 'string'
     VECTOR = 'vector'
+
 
 def type_covertion(elem):
     if isinstance(elem, str):
@@ -37,6 +40,7 @@ class VariableSymbol:
         if not isinstance(other, VariableSymbol):
             return False
         return self.type == other.type and self.shape == other.shape
+
 
 class SymbolTable(object):
 

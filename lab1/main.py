@@ -1,16 +1,17 @@
 import sys
 import scanner
-import Parser
+import parser
 from TypeChecker import TypeChecker 
-EXAMPLES_PATH = "lab1/examples"
+from Interpreter import Interpreter
+
+EXAMPLES_PATH = "examples"
 
 
 if __name__ == '__main__':
-
     try:
         filename = sys.argv[1] \
             if len(sys.argv) > 1 \
-            else f"{EXAMPLES_PATH}/example6.txt"
+            else f"{EXAMPLES_PATH}/example14.txt"
         file = open(filename, "r")
         text = file.read()
     except IOError:
@@ -18,12 +19,17 @@ if __name__ == '__main__':
         sys.exit(0)
 
     lexer = scanner.MyLexer()
-    parser = Parser.MyParser()
+    parser = parser.MyParser()
 
     ast = parser.parse(lexer.tokenize(text))
-    checker = TypeChecker()
-    checker.visit(ast)
-    for e in checker.errors:
-        print('[ERROR]'+e)
-    if len(checker.errors) == 0:
-        ast.print()
+    if ast:
+        checker = TypeChecker()
+        checker.visit(ast)
+        for e in checker.errors:
+            print('[ERROR]'+e)
+        if len(checker.errors) == 0:
+            ast.print()
+
+        print('\nInterpreting...\n')
+        interpreter = Interpreter()
+        interpreter.visit(ast)

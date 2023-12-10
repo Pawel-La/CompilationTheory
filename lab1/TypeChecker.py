@@ -1,121 +1,111 @@
-
-import AST
 from SymbolTable import *
 from SymbolTable import Types as T
 
 
-
-
 binary_correlations = {
-    "+": {T.INT: 
-                {T.INT: T.INT, 
-                 T.FLOAT: T.FLOAT},
-          T.FLOAT: 
-                {T.INT: T.FLOAT, 
-                 T.FLOAT: T.FLOAT},
-          T.STRING: 
-                {T.STRING: T.STRING}},
-    
-    "-": {T.INT: 
-                {T.INT: T.INT, 
-                 T.FLOAT: T.FLOAT},
-          T.FLOAT: 
-                {T.INT: T.FLOAT, 
-                 T.FLOAT: T.FLOAT}},
-    
-    "*": {T.INT: 
-                {T.INT: T.INT, 
-                 T.FLOAT: T.FLOAT},
-          T.FLOAT: 
-                {T.INT: T.FLOAT, 
-                 T.FLOAT: T.FLOAT}},
-    
-    "/": {T.INT: 
+    "+": {T.INT:
                 {T.INT: T.INT,
                  T.FLOAT: T.FLOAT},
-          T.FLOAT: 
-                {T.INT: T.FLOAT, 
+          T.FLOAT:
+                {T.INT: T.FLOAT,
+                 T.FLOAT: T.FLOAT},
+          T.STRING:
+                {T.STRING: T.STRING}},
+
+    "-": {T.INT:
+                {T.INT: T.INT,
+                 T.FLOAT: T.FLOAT},
+          T.FLOAT:
+                {T.INT: T.FLOAT,
                  T.FLOAT: T.FLOAT}},
-    
-    "<": {T.INT: 
-                {T.INT: T.BOOL, 
+
+    "*": {T.INT:
+                {T.INT: T.INT,
+                 T.FLOAT: T.FLOAT,
+                 T.STRING: T.STRING},
+          T.FLOAT:
+                {T.INT: T.FLOAT,
+                 T.FLOAT: T.FLOAT},
+          T.STRING:
+                {T.INT: T.STRING}},
+
+    "/": {T.INT:
+                {T.INT: T.INT,
+                 T.FLOAT: T.FLOAT},
+          T.FLOAT:
+                {T.INT: T.FLOAT,
+                 T.FLOAT: T.FLOAT}},
+
+    "<": {T.INT:
+                {T.INT: T.BOOL,
                  T.FLOAT: T.BOOL},
-          T.FLOAT: 
-                {T.INT: T.BOOL, 
+          T.FLOAT:
+                {T.INT: T.BOOL,
                  T.FLOAT: T.BOOL}},
-    
-    ">": {T.INT: 
-                {T.INT: T.BOOL, 
+
+    ">": {T.INT:
+                {T.INT: T.BOOL,
                  T.FLOAT: T.BOOL},
-          T.FLOAT: 
-                {T.INT: T.BOOL, 
+          T.FLOAT:
+                {T.INT: T.BOOL,
                  T.FLOAT: T.BOOL}},
-    
-    "<=": {T.INT: 
-                {T.INT: T.BOOL, 
+
+    "<=": {T.INT:
+                {T.INT: T.BOOL,
                  T.FLOAT: T.BOOL},
-           T.FLOAT: 
-                {T.INT: T.BOOL, 
+           T.FLOAT:
+                {T.INT: T.BOOL,
                  T.FLOAT: T.BOOL}},
-    
-    ">=": {T.INT: 
-                {T.INT: T.BOOL, 
+
+    ">=": {T.INT:
+                {T.INT: T.BOOL,
                  T.FLOAT: T.BOOL},
-           T.FLOAT: 
-                {T.INT: T.BOOL, 
+           T.FLOAT:
+                {T.INT: T.BOOL,
                  T.FLOAT: T.BOOL}},
-    
-    "==": {T.INT: 
-                {T.INT: T.BOOL, 
+
+    "==": {T.INT:
+                {T.INT: T.BOOL,
                  T.FLOAT: T.BOOL},
-           T.FLOAT: 
-                {T.INT: T.BOOL, 
+           T.FLOAT:
+                {T.INT: T.BOOL,
                  T.FLOAT: T.BOOL},
-           T.BOOL: 
+           T.BOOL:
                 {T.BOOL: T.BOOL},
-           T.STRING: 
+           T.STRING:
                 {T.STRING: T.BOOL}},
-    
-    "!=": {T.INT:  
-                {T.INT: T.BOOL, 
+
+    "!=": {T.INT:
+                {T.INT: T.BOOL,
                  T.FLOAT: T.BOOL},
-           T.FLOAT: 
+           T.FLOAT:
                 {T.INT: T.BOOL,
                   T.FLOAT: T.BOOL},
-           T.BOOL: 
+           T.BOOL:
                 {T.BOOL: T.BOOL},
-           T.STRING: 
+           T.STRING:
                 {T.STRING: T.BOOL}},
-    
-    ".+": {T.VECTOR: 
+
+    ".+": {T.VECTOR:
                 {T.VECTOR: T.VECTOR}},
-    
-    ".-": {T.VECTOR: 
+
+    ".-": {T.VECTOR:
                 {T.VECTOR: T.VECTOR}},
-    
-    ".*": {T.VECTOR: 
-                {T.VECTOR: T.VECTOR, 
-                 T.INT: T.VECTOR, 
+
+    ".*": {T.VECTOR:
+                {T.VECTOR: T.VECTOR,
+                 T.INT: T.VECTOR,
                  T.FLOAT: T.VECTOR},
-           T.INT: 
+           T.INT:
                 {T.VECTOR: T.VECTOR},
-           T.FLOAT: 
+           T.FLOAT:
                 {T.VECTOR: T.VECTOR}},
-    
-    "./": {T.VECTOR: 
-                {T.VECTOR: T.VECTOR, 
-                 T.INT: T.VECTOR, 
+
+    "./": {T.VECTOR:
+                {T.VECTOR: T.VECTOR,
+                 T.INT: T.VECTOR,
                  T.FLOAT: T.VECTOR}}
 }
-
-
-
-
-
-
-
-
-
 
 
 class NodeVisitor(object):
@@ -125,11 +115,9 @@ class NodeVisitor(object):
         visitor = getattr(self, method, self.generic_visit)
         return visitor(node)
 
-
     def generic_visit(self, node):        # Called if no explicit visitor function exists for a node.
         print(node)
-        print( "generic_visit", node.__class__.__name__)
-
+        print("generic_visit", node.__class__.__name__)
 
 
 class TypeChecker(NodeVisitor):
@@ -139,13 +127,13 @@ class TypeChecker(NodeVisitor):
         self.loopcount = 0
         self.errors = []
 
-    def visit_BinaryOperation(self, node : AST.BinaryOperation):
+    def visit_BinaryOperation(self, node: AST.BinaryOperation):
 
-        sym1 = self.visit(node.left_expression)     
+        sym1 = self.visit(node.left_expression)
         sym2 = self.visit(node.right_expression)
 
         if sym1 is None or sym2 is None:
-            return 
+            return
 
         try:
             new_type = binary_correlations[node.op][sym1.type][sym2.type]
@@ -160,18 +148,18 @@ class TypeChecker(NodeVisitor):
                 self.errors.append(f"Vectors different shape on line {node.line_number}")
         return VariableSymbol(None, new_type)
 
-    def visit_StatementList(self, node :AST.StatementList):
+    def visit_StatementList(self, node: AST.StatementList):
         for statement in node.statements:
             self.visit(statement)
 
-    def visit_IfStatement(self, node : AST.IfStatement):
+    def visit_IfStatement(self, node: AST.IfStatement):
         self.visit(node.expression)
         self.visit(node.statement_if)
 
         if node.statement_else is not None:
             self.visit(node.statement_else)
-    
-    def visit_WhileStatement(self, node : AST.WhileStatement):
+
+    def visit_WhileStatement(self, node: AST.WhileStatement):
         self.loopcount += 1
 
         self.symbol_table = self.symbol_table.pushScope("While")
@@ -181,7 +169,7 @@ class TypeChecker(NodeVisitor):
         self.loopcount -= 1
         self.symbol_table = self.symbol_table.popScope()
 
-    def visit_ForStatement(self, node : AST.ForStatement):
+    def visit_ForStatement(self, node: AST.ForStatement):
         self.loopcount += 1
 
         self.symbol_table = self.symbol_table.pushScope("For")
@@ -234,11 +222,13 @@ class TypeChecker(NodeVisitor):
                     f"Variable {node.value} not declared in line {node.line_number}"
                 )
             return symbol
-            
+
         return self.visit(node.value)
 
-    def visit_PrintStatement(self, node : AST.PrintStatement):
-        self.visit(node.list_content)
+    def visit_PrintStatement(self, node: AST.PrintStatement):
+        # self.visit(node.expression)
+        for elem in node.expression:
+            self.visit(elem)
 
     def visit_AssignmentStatement(self, node: AST.AssignmentStatement):
         symbol = self.visit(node.expression)
@@ -255,7 +245,7 @@ class TypeChecker(NodeVisitor):
             else:
                 element_type = VariableSymbol(None, type_covertion(element))
             types += [element_type]
-    
+
 
         if all(x == types[0] for x in types):
             if types[0].type == T.VECTOR:
@@ -267,7 +257,7 @@ class TypeChecker(NodeVisitor):
                 f"Vector elements have different types in line {node.line_number}"
             )
             return None
-  
+
     def visit_IdContent(self, node : AST.IdContent):
         symbol = self.symbol_table.get(node.identifier)
         if symbol is None:
@@ -285,8 +275,11 @@ class TypeChecker(NodeVisitor):
         return VariableSymbol(None, T.VECTOR, "Unknown")
 
     def visit_Number(self, node : AST.Number):
-        return VariableSymbol(None,type_covertion(node.value))
-    
+        return VariableSymbol(None, type_covertion(node.value))
+
+    def visit_String(self, node: AST.String):
+        return VariableSymbol(None, type_covertion(node.value))
+
 
 if __name__ == "__main__":
     print(binary_correlations["./"][Types.VECTOR][Types.VECTOR])

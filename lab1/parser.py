@@ -97,12 +97,20 @@ class MyParser(Parser):
             line_number=p.lineno
         )
 
-    @_("PRINT ListContent")
+    @_("PRINT PrintContent")
     def PrintStatement(self, p):
         return AST.PrintStatement(
-            list_content=p[1],
+            expression=p[1],
             line_number=p.lineno
         )
+
+    @_('Expression "," PrintContent')
+    def PrintContent(self, p):
+        return [p[0]] + p[2]
+
+    @_("Expression")
+    def PrintContent(self, p):
+        return [p[0]]
 
     @_(
         'ID_Content "="         Expression',
@@ -164,7 +172,7 @@ class MyParser(Parser):
     @_(
         "List",
         "Number",
-        "STRING",
+        "String",
         "ID_Content",
         "MatrixSpecialFunction",
     )
@@ -180,12 +188,24 @@ class MyParser(Parser):
         )
 
     @_(
-        "Number",
-        "ID"
+        "Number"
     )
     def RangeElement(self, p):
         return AST.RangeElement(
             value=p[0],
+            line_number=p.lineno
+        )
+
+    @_(
+        "ID"
+    )
+    def RangeElement(self, p):
+        id_content = AST.IdContent(
+            identifier=p[0],
+            line_number=p.lineno
+        )
+        return AST.RangeElement(
+            value=id_content,
             line_number=p.lineno
         )
 
@@ -234,10 +254,25 @@ class MyParser(Parser):
             line_number=p.lineno
         )
 
-    @_('DECIMAL', 'ID')
+    @_('DECIMAL')
+    def ListAccessElement(self, p):
+        return AST.ListAccessElement(
+            value=int(p[0]),
+            line_number=p.lineno
+        )
+
+    @_('ID', 'ListAccessElementRange')
     def ListAccessElement(self, p):
         return AST.ListAccessElement(
             value=p[0],
+            line_number=p.lineno
+        )
+
+    @_('DECIMAL ":" DECIMAL')
+    def ListAccessElementRange(self, p):
+        return AST.ListAccessElementRange(
+            from_value=int(p[0]),
+            to_value=int(p[2]),
             line_number=p.lineno
         )
 
@@ -268,6 +303,15 @@ class MyParser(Parser):
     def Number(self, p):
         return AST.Number(
             value=float(p[0]),
+            line_number=p.lineno
+        )
+
+    @_(
+        "STRING"
+    )
+    def String(self, p):
+        return AST.String(
+            value=p[0][1:-1],
             line_number=p.lineno
         )
 

@@ -1,4 +1,6 @@
 from abc import ABC, abstractmethod
+
+
 class Node(ABC):
     count = 0
 
@@ -17,7 +19,6 @@ class StatementList(
     def __init__(self, statements, line_number=None):
         super().__init__()
         self.line_number = line_number
-
         self.statements = statements
 
     def print(self, indent=0):
@@ -97,21 +98,17 @@ class JumpStatement(Node):
 
 class PrintStatement(Node):
     def __init__(
-        self, list_content, line_number=None
+        self, expression, line_number=None
     ):
         super().__init__()
         self.line_number = line_number
 
-        self.list_content = list_content
+        self.expression = expression
 
     def print(self, indent=0):
         print("| " * indent + "print")
-
-        for elem in self.list_content:
-            if type(elem) == str:
-                print("| " * (indent + 1) + elem)
-            else:
-                elem.print(indent + 1)
+        for el in self.expression:
+            el.print(indent + 1)
 
 
 class AssignmentStatement(Node):
@@ -208,10 +205,7 @@ class RangeElement(Node):
         self.value = value
 
     def print(self, indent=0):
-        if type(self.value) == str:
-            print("| " * indent + self.value)
-        else:
-            self.value.print(indent)
+        self.value.print(indent)
 
 
 class List(Node):
@@ -270,14 +264,29 @@ class ListAccessElement(Node):
         self.value = value
 
     def print(self, indent=0):
-        print("| " * indent + str(self.value))
+        if type(self.value) == int or type(self.value) == str:
+            print("| " * indent + str(self.value))
+        else:
+            self.value.print(indent)
+
+
+class ListAccessElementRange(Node):
+    def __init__(self, from_value, to_value, line_number=None):
+        super().__init__()
+        self.line_number = line_number
+        self.from_value = from_value
+        self.to_value = to_value
+
+    def print(self, indent=0):
+        print("| " * (indent + 1) + "RANGE")
+        print("| " * (indent + 1) + str(self.from_value))
+        print("| " * (indent + 1) + str(self.to_value))
 
 
 class MatrixSpecialFunction(Node):
     def __init__(self, function, expression, line_number=None):
         super().__init__()
         self.line_number = line_number
-        print(function)
         self.function = function
         self.expression = expression
 
@@ -294,3 +303,13 @@ class Number(Node):
 
     def print(self, indent=0):
         print("| " * indent + str(self.value))
+
+
+class String(Node):
+    def __init__(self, value, line_number=None):
+        super().__init__()
+        self.line_number = line_number
+        self.value = value
+
+    def print(self, indent=0):
+        print("| " * indent + self.value)
