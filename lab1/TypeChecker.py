@@ -238,7 +238,8 @@ class TypeChecker(NodeVisitor):
         return self.visit(node.value)
 
     def visit_PrintStatement(self, node : AST.PrintStatement):
-        self.visit(node.list_content)
+        for elem in node.list_content:
+            self.visit(elem)
 
     def visit_AssignmentStatement(self, node: AST.AssignmentStatement):
         symbol = self.visit(node.expression)
