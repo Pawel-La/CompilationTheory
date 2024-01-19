@@ -289,6 +289,7 @@ class MatrixSpecialFunction(Node):
         self.line_number = line_number
         self.function = function
         self.expression = expression
+        # print(expression.value)
 
     def print(self, indent=0):
         print("| " * indent + f"{self.function}")

@@ -41,6 +41,8 @@ class VariableSymbol:
             return False
         return self.type == other.type and self.shape == other.shape
 
+    def __str__(self):
+        return f"Variable name:{self.name} type:{self.type} shape:{self.shape}"
 
 class SymbolTable(object):
 

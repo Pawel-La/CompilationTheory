@@ -259,20 +259,35 @@ class TypeChecker(NodeVisitor):
             return None
 
     def visit_IdContent(self, node : AST.IdContent):
+        # print('###')
+        # node.print()
+        # print('###')
         symbol = self.symbol_table.get(node.identifier)
+        print('LIST ACCES',node.list_access)
         if symbol is None:
             self.errors.append(
                 f"Variable {node.identifier} not declared in line {node.line_number}"
             )
             return None
-        else:
+        elif node.list_access is None: 
             return symbol
 
+        else:
+            index = self.visit(node.list_access)
 
+    def visit_ListAccess(self, node : AST.ListAccess):
+        left = self.visit(node.list_access_element_left)
+        if node.list_access_element_right != None:
+            right = self.visit(node.list_access_element_right)
+            return (left, right)
+        return (left,)
+
+    # def visit_ListAccessElement(self, node : AST.ListAccessElement):
+    #     pass
 
     def visit_MatrixSpecialFunction(self, node : AST.MatrixSpecialFunction):
-        symbol = self.visit(node.expression)
-        return VariableSymbol(None, T.VECTOR, "Unknown")
+        size = node.expression.value
+        return VariableSymbol(None, T.VECTOR, (size, size))
 
     def visit_Number(self, node : AST.Number):
         return VariableSymbol(None, type_covertion(node.value))

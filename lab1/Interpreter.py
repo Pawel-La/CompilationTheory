@@ -37,7 +37,12 @@ class Interpreter(object):
         self.memory.push_memory_to_stack()
 
         while self.visit(node.expression):
-            self.visit(node.statement)
+            try:
+                self.visit(node.statement)
+            except ContinueException:
+                continue
+            except BreakException:
+                break
 
         self.memory.pop_memory_from_stack()
 
@@ -46,12 +51,17 @@ class Interpreter(object):
         self.memory.push_memory_to_stack()
 
         list_to_iterate = self.visit(node.range_or_list)
-
-        for el in list_to_iterate:
-            self.memory.set_variable(node.identifier, el)
-            self.visit(node.statement)
-
-        self.memory.pop_memory_from_stack()
+        try:
+            for el in list_to_iterate:
+                try:
+                    self.memory.set_variable(node.identifier, el)
+                    self.visit(node.statement)
+                except ContinueException:
+                    continue
+                except BreakException:
+                    break
+        finally:
+            self.memory.pop_memory_from_stack()
 
     @when(AST.PrintStatement)
     def visit(self, node: AST.PrintStatement):
@@ -127,6 +137,15 @@ class Interpreter(object):
         }
 
         return ops[node.op](left, right)
+    
+    @when(AST.JumpStatement)
+    def visit(self, node: AST.JumpStatement):
+        print(node.name)
+        if node.name == "BREAK":
+            raise BreakException()
+        
+        if node.name == "CONTINUE":
+            raise ContinueException()
 
     @when(AST.Range)
     def visit(self, node: AST.Range):

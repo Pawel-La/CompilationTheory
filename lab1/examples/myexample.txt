@@ -1,0 +1,10 @@
+for n = 2:100 {
+    end = n - 1;
+    if (n == 20){
+        continue;
+    }
+    if (n == 87){
+        break;
+    }
+    print(n);
+}
